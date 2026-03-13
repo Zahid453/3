@@ -1,0 +1,52 @@
+import numpy as np
+np.random.seed(42)
+n=1000
+
+
+
+import pandas as pd
+
+df=pd.DataFrame({
+"sessions_before":np.random.poisson(10,n),
+"time_spent_before":np.random.normal(120,30,n),
+"purchases_before":np.random.poisson(2,n)})
+
+
+
+df["sessions_after"]=df.sessions_before+np.random.normal(1,3,n)
+df["delta_sessions"]=df.sessions_after-df.sessions_before
+df["churn"]=(df.delta_sessions<-3).astype(int)
+
+
+X=df[["sessions_before","time_spent_before","purchases_before"]]
+
+
+
+# Regression
+
+from sklearn.model_selection import train_test_split
+Xtr,Xte,ytr,yte=train_test_split(X,df.delta_sessions,test_size=0.2)
+
+from sklearn.ensemble import RandomForestRegressor
+reg=RandomForestRegressor().fit(Xtr,ytr)
+
+from sklearn.metrics import mean_squared_error
+print("RMSE:",np.sqrt(mean_squared_error(yte,reg.predict(Xte))))
+
+
+
+# Classification
+
+Xtr,Xte,ytr,yte=train_test_split(X,df.churn,test_size=0.2)
+from sklearn.ensemble import RandomForestClassifier
+
+from sklearn.metrics import classification_report
+clf=RandomForestClassifier().fit(Xtr,ytr)
+print(classification_report(yte,clf.predict(Xte)))
+
+
+import matplotlib.pyplot as plt
+plt.bar(X.columns,clf.feature_importances_)
+plt.show()import matplotlib.pyplot as plt
+plt.bar(X.columns,clf.feature_importances_)
+plt.show()

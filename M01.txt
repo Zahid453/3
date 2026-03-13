@@ -1,0 +1,38 @@
+# Load data
+import pandas as pd
+data = pd.read_csv("/content/drive/MyDrive/Sem IV/3. MLSD/Practical/Datasets/hotel_booking.csv")
+
+# Encode hotel type
+from sklearn.preprocessing import LabelEncoder
+enc = LabelEncoder()
+data['hotel'] = enc.fit_transform(data['hotel'])
+
+
+
+# Train model
+X = data[['hotel','lead_time','stays_in_weekend_nights','stays_in_week_nights']]
+y = data['is_canceled']
+
+from sklearn.model_selection import train_test_split
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.2,random_state=42)
+
+
+
+from sklearn.ensemble import RandomForestClassifier
+model = RandomForestClassifier().fit(X_train,y_train)
+
+from sklearn.metrics import accuracy_score
+print("Accuracy:",accuracy_score(y_test,model.predict(X_test)))
+
+
+
+
+# Chatbot
+print("\n🤖 Hotel Booking Chatbot")
+h = enc.transform([input("Hotel (Resort Hotel / City Hotel): ")])[0]
+l = int(input("Days before booking: "))
+we = int(input("Weekend nights: "))
+wk = int(input("Week nights: "))
+
+r = model.predict(np.array([[h,l,we,wk]]))[0]
+print("\n⚠️ High cancellation risk" if r==1 else "\n✅ Low cancellation risk")

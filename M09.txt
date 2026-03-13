@@ -1,0 +1,44 @@
+import pandas as pd
+
+users = pd.DataFrame({'user_id':[1,2,3,4],'name':['Alice','Bob','Charlie','David']})
+
+posts = pd.DataFrame({
+'post_id':[101,102,103,104,105,106],
+'content':['AI in healthcare and machine learning',
+'Stock market analysis and investment tips',
+'Deep learning for image recognition',
+'Football match highlights and sports news',
+'Cybersecurity and ethical hacking guide',
+'Healthy lifestyle and fitness routines']})
+
+inter = pd.DataFrame({'user_id':[1,1,2,2,3,3,4,4],
+'post_id':[101,103,102,104,101,105,104,106],
+'rating':[5,4,5,3,4,5,5,4]})
+
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+tf= TfidfVectorizer(stop_words='english').fit_transform(posts.content)
+
+from sklearn.metrics.pairwise import cosine_similarity
+sim= cosine_similarity(tf)
+
+from sklearn.decomposition import TruncatedSVD
+ui= inter.pivot_table(index='user_id',columns='post_id',values='rating').fillna(0)
+svd=TruncatedSVD(2); pred=pd.DataFrame(svd.fit_transform(ui)@svd.components_,index=ui.index,columns=ui.columns)
+
+
+
+
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+
+def rec(uid,n=3,a=0.6):
+    coll=pred.loc[uid].values
+    up=inter[inter.user_id==uid].post_id
+    cont=sum(sim[posts[posts.post_id==p].index[0]] for p in up)
+    coll=MinMaxScaler().fit_transform(coll.reshape(-1,1)).ravel()
+    cont=MinMaxScaler().fit_transform(cont.reshape(-1,1)).ravel()
+    res=posts.copy(); res["score"]=a*coll+(1-a)*cont
+    return res[~res.post_id.isin(up)].sort_values("score",ascending=False).head(n)
+
+print(rec(1,5)[["post_id","content","score"]])

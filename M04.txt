@@ -1,0 +1,40 @@
+class Node:
+    def __init__(self):
+        self.c={}; self.end=False; self.f=0
+
+class Trie:
+    def __init__(self): self.r=Node()
+
+    def insert(self,w,f=1):
+        n=self.r
+        for ch in w: n=n.c.setdefault(ch,Node())
+        n.end,n.f=True,n.f+f
+
+    def search(self,p):
+        n=self.r
+        for ch in p:
+            if ch not in n.c: return []
+            n=n.c[ch]
+        res=[]; self.collect(n,p,res)
+        return [w for w,_ in sorted(res,key=lambda x:x[1],reverse=True)[:10]]
+
+    def collect(self,n,w,res):
+        if n.end: res.append((w,n.f))
+        for ch in n.c: self.collect(n.c[ch],w+ch,res)
+
+data={
+"python list comprehension by Zahid Shaikh":150,
+"python sort list":200,
+"javascript closure by Zahid Shaikh":80,
+"java nullpointerexception by Zahid Shaikh":300,
+"python dictionary iteration":120,
+"python":500,
+"javascript":400
+}
+
+t=Trie()
+for w,f in data.items(): t.insert(w,f)
+
+for q in ["python","java","javas"]:
+    print("\nSuggestions for",q)
+    for s in t.search(q): print("*",s)

@@ -1,0 +1,55 @@
+import numpy as np, pandas as pd, random
+from datetime import datetime
+from sklearn.linear_model import LinearRegression
+
+np.random.seed(42)
+n = 500
+
+demand = np.random.rand(n)
+supply = np.random.rand(n)
+competitor_price = np.random.uniform(900,1200,n)
+
+hour = np.random.randint(0,24,n)
+time_factor = (hour>=18) & (hour<=22)
+
+month = np.random.randint(1,13,n)
+season_factor = (month==12)
+
+base_price = 1000
+
+price = (base_price
+         + 300*demand
+         - 250*supply
+         + 150*time_factor
+         + 200*season_factor
+         + 0.5*competitor_price
+         + np.random.normal(0,50,n))
+
+# Create DataFrame
+df = pd.DataFrame({
+    "demand": demand,
+    "supply": supply,
+    "competitor_price": competitor_price,
+    "time_factor": time_factor,
+    "season_factor": season_factor,
+    "price": price
+})
+
+X,y=df.drop("price",axis=1),df["price"]
+model=LinearRegression().fit(X,y)
+print("Model Trained ✅")
+
+# Real-time data
+d,s=random.random(),random.random()
+cp=random.uniform(900,1200)
+h,m=datetime.now().hour,datetime.now().month
+
+tf,sf=(18<=h<=22),(m==12)
+
+pred=model.predict([[d,s,cp,tf,sf]])[0]
+final=max(min(pred,cp*1.05),cp*0.95)
+
+print("\n--- Dynamic Price ---")
+print("Demand:",round(d,2),"Supply:",round(s,2))
+print("Competitor:",round(cp,2))
+print("Price:",round(final,2))

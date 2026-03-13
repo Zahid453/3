@@ -1,0 +1,13 @@
+drivers=[{"name":"Rahul","rating":4.8,"language":"Hindi"},
+{"name":"Amit","rating":4.5,"language":"English"},
+{"name":"Suresh","rating":4.9,"language":"Hindi"},
+{"name":"John","rating":4.7,"language":"English"}]
+
+user={"preferred_language":"English","budget":300,"ride_history":["Mini","Mini","Sedan","Mini"]}
+
+def book_ride(d):
+    ride="Mini (Budget Suggestion)" if d*15<user["budget"] else "Sedan (Budget Suggestion)"
+    drv=max([x for x in drivers if x["language"]==user["preferred_language"]],key=lambda x:x["rating"])
+    return {"Recommended Ride":ride,"Driver Assigned":drv["name"],"Driver Rating":drv["rating"]}
+
+print(book_ride(100))

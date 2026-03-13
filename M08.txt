@@ -1,0 +1,23 @@
+import numpy as np
+np.random.seed(42); n=10000
+
+import pandas as pd
+df=pd.DataFrame({
+"impression_id":range(n),
+"user_id":np.random.randint(1,1000,n),
+"ad_id":np.random.randint(1,100,n),
+"predicted_ctr":np.random.uniform(0.01,0.9,n),
+"true_click":np.random.binomial(1,0.3,n),
+"bid":np.random.uniform(1,10,n),
+"timestamp":pd.date_range("2024-01-01",periods=n,freq="s")
+})
+
+from sklearn.metrics import roc_auc_score, log_loss, ndcg_score
+def eval_ads(d):
+    print("CTR:",d.true_click.mean(),
+          "\nLogLoss:",log_loss(d.true_click,d.predicted_ctr),
+          "\nAUC:",roc_auc_score(d.true_click,d.predicted_ctr),
+          "\nNDCG:",ndcg_score([d.true_click],[d.predicted_ctr]),
+          "\nRevenue:",(d.true_click*d.bid).sum())
+
+eval_ads(df)
